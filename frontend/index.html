@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AnonForum - Diễn đàn thảo luận ẩn danh hoàn toàn miễn phí">
+    <meta name="keywords" content="anonymous, forum, discussion, free, vietnam">
+    <meta name="author" content="AnonForum">
+
+    <!-- PWA -->
+    <!-- <meta name="theme-color" content="#00ff88" />
+    <link rel="manifest" href="assets/manifest.json" /> -->
+
+    <!-- Favicon -->
+    <!-- <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕵️</text></svg>" /> -->
+
+    <!-- Preload -->
+    <!-- <link rel="preload" href="css/style.css" as="style" />
+    <link rel="preload" href="js/app.js" as="script" /> -->
+
+    <title>AnonForum - Diễn đàn ẩn danh</title>
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <p>Đang khởi tạo diễn đàn...</p>
+    </div>
+
+    <!-- Main App -->
+    <div id="app" class="app" style="display: none;">
+        <!-- Online Counter -->
+        <div class="online-counter">
+            <span class="online-dot"></span>
+            <span id="onlineCount">0</span> online
+        </div>
+
+        <div class="container">
+            <!-- Header -->
+            <header class="header">
+                <h1 class="logo">🕵️ AnonForum</h1>
+                <p class="subtitle">Diễn đàn thảo luận ẩn danh - Hoàn toàn miễn phí</p>
+                <div class="stats">
+                    <div class="stat">
+                        <span class="stat-number" id="postCount">0</span>
+                        <span class="stat-label">Bài viết</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number" id="commentCount">0</span>
+                        <span class="stat-label">Bình luận</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">100%</span>
+                        <span class="stat-label">Ẩn danh</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Privacy Notice -->
+            <div class="privacy-notice" id="privacyNotice">
+                <span class="privacy-icon">🛡️</span>
+                <div class="privacy-text">
+                    <strong>Hoàn toàn ẩn danh:</strong> Dữ liệu chỉ lưu trên máy bạn, không gửi server, không theo dõi
+                </div>
+                <button class="privacy-close" onclick="closePrivacyNotice()">&times;</button>
+            </div>
+
+            <!-- Create Post -->
+            <section class="create-post" id="createPostSection">
+                <div class="create-post-toggle" onclick="toggleCreatePost()">
+                    <span class="toggle-icon">✍️</span>
+                    <span class="toggle-text">Tạo bài viết ẩn danh</span>
+                    <span class="toggle-arrow">▼</span>
+                </div>
+
+                <div class="create-post-form" id="createPostForm" style="display: none;">
+                    <form id="postForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="postTitle">Tiêu đề</label>
+                                <input type="text" id="postTitle" placeholder="Nhập tiêu đề..." maxlength="200"
+                                    required>
+                                <div class="char-counter"><span id="titleCounter">0</span>/200</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="postCategory">Chủ đề</label>
+                                <select id="postCategory" required>
+                                    <option value="">Chọn chủ đề</option>
+                                    <option value="general">🌐 Tổng hợp</option>
+                                    <option value="tech">💻 Công nghệ</option>
+                                    <option value="crypto">₿ Crypto</option>
+                                    <option value="society">👥 Xã hội</option>
+                                    <option value="confession">💭 Tâm sự</option>
+                                    <option value="question">❓ Hỏi đáp</option>
+                                    <option value="random">🎲 Random</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="postContent">Nội dung</label>
+                            <textarea id="postContent" placeholder="Chia sẻ suy nghĩ của bạn một cách ẩn danh..."
+                                maxlength="2000" required rows="5"></textarea>
+                            <div class="char-counter"><span id="contentCounter">0</span>/2000</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="postTags">Tags (tùy chọn)</label>
+                            <input type="text" id="postTags"
+                                placeholder="VD: cuộc sống, công nghệ, tâm sự (tách bằng dấu phẩy)">
+                            <small class="form-hint">Tối đa 5 tags</small>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="clearForm()">Xóa</button>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <span class="btn-icon">🚀</span>
+                                <span class="btn-text">Đăng bài</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Filter Bar -->
+            <div class="filter-bar">
+                <button class="filter-btn active" data-category="all" onclick="filterPosts('all')">Tất cả</button>
+                <button class="filter-btn" data-category="general" onclick="filterPosts('general')">🌐 Tổng hợp</button>
+                <button class="filter-btn" data-category="tech" onclick="filterPosts('tech')">💻 Tech</button>
+                <button class="filter-btn" data-category="crypto" onclick="filterPosts('crypto')">₿ Crypto</button>
+                <button class="filter-btn" data-category="society" onclick="filterPosts('society')">👥 Xã hội</button>
+                <button class="filter-btn" data-category="confession" onclick="filterPosts('confession')">💭 Tâm
+                    sự</button>
+                <button class="filter-btn" data-category="question" onclick="filterPosts('question')">❓ Hỏi đáp</button>
+            </div>
+
+            <!-- Posts Container -->
+            <main class="posts-container" id="postsContainer">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Đang tải bài viết...</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Comments Modal -->
+    <div class="modal" id="commentsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>💬 Bình luận</h3>
+                <button class="modal-close" onclick="closeCommentsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="post-preview" id="postPreview"></div>
+                <div class="comments-list" id="commentsList"></div>
+                <form class="comment-form" id="commentForm">
+                    <div class="form-group">
+                        <textarea id="commentContent" placeholder="Viết bình luận ẩn danh..." maxlength="1000" rows="3"
+                            required></textarea>
+                        <div class="char-counter"><span id="commentCounter">0</span>/1000</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">💬 Gửi bình luận</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Container -->
+    <div class="notification-container" id="notificationContainer"></div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-main">
+                <p>🛡️ <strong>AnonForum</strong> - Bảo vệ quyền riêng tư tuyệt đối</p>
+                <p>Dữ liệu chỉ lưu trên máy bạn • Không server • Không theo dõi</p>
+            </div>
+            <div class="footer-links">
+                <button onclick="showAbout()">Giới thiệu</button>
+                <button onclick="showPrivacyInfo()">Quyền riêng tư</button>
+                <button onclick="showTechInfo()">Công nghệ</button>
+                <button onclick="exportData()">Xuất dữ liệu</button>
+                <button onclick="clearAllData()">Xóa toàn bộ</button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- About Modal -->
+    <div class="modal" id="aboutModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🕵️ Về AnonForum</h3>
+                <button class="modal-close" onclick="closeModal('aboutModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="about-content">
+                    <h4>🎯 Mục đích</h4>
+                    <p>Tạo không gian thảo luận hoàn toàn ẩn danh, nơi mọi người có thể chia sẻ suy nghĩ mà không lo bị
+                        theo dõi.</p>
+
+                    <h4>🛡️ Cam kết bảo mật</h4>
+                    <ul>
+                        <li>✅ Không có server - chỉ chạy trên browser</li>
+                        <li>✅ Dữ liệu lưu LocalStorage trên máy bạn</li>
+                        <li>✅ Không thu thập IP, cookies, analytics</li>
+                        <li>✅ Không gửi dữ liệu đi đâu</li>
+                        <li>✅ Open source - kiểm tra được code</li>
+                    </ul>
+
+                    <h4>⚖️ Quy tắc cộng đồng</h4>
+                    <ul>
+                        <li>🚫 Không spam, quảng cáo</li>
+                        <li>🚫 Không nội dung bạo lực, phân biệt</li>
+                        <li>🚫 Không chia sẻ thông tin cá nhân</li>
+                        <li>✅ Tôn trọng ý kiến khác biệt</li>
+                        <li>✅ Thảo luận văn minh, xây dựng</li>
+                    </ul>
+
+                    <h4>🔧 Công nghệ</h4>
+                    <p>Pure HTML/CSS/JavaScript, LocalStorage, PWA, không backend.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- JS Scripts -->
+    <script src="js/utils.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    
+</body>
+
+</html>
